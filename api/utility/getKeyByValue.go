@@ -1,10 +1,16 @@
 package utility
 
-// Use to get key from value
-func GetKeysByValue(m map[int]string, value string) (key []int, ok bool) {
+// Get key from map's value
+// Param
+//	m : map object
+//	value : value to search in map object
+// Return
+//	keys : int array that contains key which is matched value
+
+func GetKeysByValue(m map[int]string, value string) (keys []int, ok bool) {
 	for k, v := range m {
 		if v == value {
-			key = append(key, k)
+			keys = append(keys, k)
 			ok = true
 		}
 	}

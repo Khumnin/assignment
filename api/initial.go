@@ -9,18 +9,28 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Initialize singleton
 var lock = &sync.Mutex{}
 
 type singleton map[int]string
 
 var tableInstant singleton
+
 var seatPerTable int
 var duplicateError = "The table instant is already initialized."
 
-// initial table as defined
+// Initial Table API
+// To initial the first use with the number of table
+// Param
+//
+//	num : The amount of table that is going to be initialized
+//
+// Retrun
+//
+//	response : response model that contains status and error message (if any)
 func InitTable(num int) res.Response {
 
-	// Create singleton table instant
+	// Create singleton table instant for the first time
 	if tableInstant == nil {
 		lock.Lock()
 		defer lock.Unlock()
@@ -41,18 +51,18 @@ func InitTable(num int) res.Response {
 		return res.Response{IsSuccess: false, Message: duplicateError}
 	}
 
-	// Assign value
+	// Assign default value to map
 	for i := 0; i < num; i++ {
 		tableInstant[i+1] = ""
 	}
 
-	// Read config data
-	viper.SetConfigName("init")     // ชื่อ config file
-	viper.AddConfigPath("./config") // ระบุ path ของ config file
-	viper.AutomaticEnv()            // อ่าน value จาก ENV variable
-	// แปลง _ underscore ใน env เป็น . dot notation ใน viper
+	// (Optional) Read config data
+	viper.SetConfigName("init")
+	viper.AddConfigPath("./config")
+	viper.AutomaticEnv()
+	// Convert '_' int env to be dot notation in viper
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	// อ่าน config
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %s \n", err))
@@ -65,8 +75,5 @@ func InitTable(num int) res.Response {
 		panic(fmt.Errorf("fatal error read data: table.seatPerTabel \n"))
 	}
 
-	//fmt.Printf("Init Table %d ", num)
-	//bs, _ := json.Marshal(tableInstant)
-	//fmt.Println(string(bs))
 	return res.Response{IsSuccess: true}
 }
