@@ -1,71 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
-	"strconv"
 
-	api "example.com/assignment/reservation/api"
-	model "example.com/assignment/reservation/model"
+	"example.com/assignment/reservation/handler"
 	"github.com/gin-gonic/gin"
 )
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
-	fmt.Println("Endpoint Hit: homePage")
-}
-
-func handleRequests() {
-	http.HandleFunc("/", homePage)
-	log.Fatal(http.ListenAndServe(":10000", nil))
-}
-
 func main() {
 
-	r := gin.New()
+	r := gin.Default()
 
-	r.POST("/initial/:num", func(c *gin.Context) {
-		numOfTable, err := strconv.Atoi(c.Param("num"))
+	r.GET("/healthcheck", handler.HealthCheckHandler)
 
-		if err != nil {
-			c.JSON(http.StatusOK, model.Response{IsSuccess: false, Message: err.Error()})
-		} else {
-			res := api.InitTable(numOfTable)
-			c.JSON(http.StatusOK, res)
-		}
+	v1 := r.Group("/api/v1")
+	{
+		reservationHandler := handler.ReservationHandler{}
+		v1.POST("/initial/:num", reservationHandler.InitialTable)
+		v1.POST("/reserve/:customerCount", reservationHandler.ReserveTable)
+		v1.POST("/cancel/:bookingId", reservationHandler.CancelReservation)
+	}
 
-	})
-
-	r.POST("/reserve/:customerCount", func(c *gin.Context) {
-		numOfCustomer, err := strconv.Atoi(c.Param("customerCount"))
-
-		if err != nil {
-			c.JSON(http.StatusOK, model.Response{IsSuccess: false, Message: err.Error()})
-		} else {
-			bookingId, bookedCount, remaining, res := api.Reserve(numOfCustomer)
-
-			if res.IsSuccess == false {
-				c.JSON(http.StatusOK, res)
-			} else {
-				c.JSON(http.StatusOK, model.Reservation{IsSuccess: true, BookingId: bookingId, NumOfBooked: bookedCount, Remaining: remaining})
-			}
-
-		}
-	})
-
-	r.POST("/cancel/:bookingId", func(c *gin.Context) {
-
-		freedCount, remaining, res := api.Cancelation(c.Param("bookingId"))
-
-		if res.IsSuccess == false {
-			c.JSON(http.StatusOK, res)
-		} else {
-			c.JSON(http.StatusOK, model.Cancelation{IsSuccess: true, NumOfFreed: freedCount, Remaining: remaining})
-		}
-
-	})
-
-	r.Run()
-	//handleRequests()
+	log.Fatal((r.Run(":8080")))
 }
