@@ -16,11 +16,7 @@ func Reserve(num int) (string, int, int, res.Response) {
 
 	availableTables, status := util.GetKeysByValue(tableInstant, "")
 
-	if !status {
-		return "", 0, 0, res.Response{IsSuccess: false, Message: "Failed to get available tables"}
-	}
-
-	if len(availableTables) == 0 {
+	if !status && availableTables == nil {
 		return "", 0, 0, res.Response{IsSuccess: false, Message: "No Available tables"}
 	}
 
