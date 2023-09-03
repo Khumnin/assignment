@@ -37,7 +37,7 @@ func Reserve(num int) (string, int, int, res.Response) {
 	tableCountForThisGroup := int(math.Ceil(float64(num) / float64(seatPerTable)))
 
 	if tableCountForThisGroup > len(availableTables) {
-		return "", tableCountForThisGroup, len(availableTables), res.Response{IsSuccess: false, Message: "Available tables is not enough"}
+		return "", 0, len(availableTables), res.Response{IsSuccess: false, Message: "Available tables is not enough"}
 	}
 
 	// Generate booking ID

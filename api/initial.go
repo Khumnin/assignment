@@ -2,11 +2,9 @@ package api
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	res "example.com/assignment/reservation/model"
-	"github.com/spf13/viper"
 )
 
 // Initialize singleton
@@ -56,24 +54,11 @@ func InitTable(num int) res.Response {
 		tableInstant[i+1] = ""
 	}
 
-	// (Optional) Read config data
-	viper.SetConfigName("init")
-	viper.AddConfigPath("./config")
-	viper.AutomaticEnv()
-	// Convert '_' int env to be dot notation in viper
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s \n", err))
-	}
-
-	value, ok := viper.Get("table.seatPerTabel").(int)
-	seatPerTable = value
-
-	if !ok {
-		panic(fmt.Errorf("fatal error read data: table.seatPerTabel \n"))
-	}
-
+	seatPerTable = 4
 	return res.Response{IsSuccess: true}
+}
+
+func CleanTable() bool {
+	tableInstant = nil
+	return true
 }
